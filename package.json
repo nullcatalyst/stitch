@@ -1,0 +1,47 @@
+{
+  "name": "stitch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "bin": "bin/stitch",
+  "scripts": {
+    "build": "tsc",
+    "install": "npm run build",
+    "test": "jest"
+  },
+  "author": {
+    "name": "Scott Bennett",
+    "email": "scottbennett912@gmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-node-resolve": "^13.0.6",
+    "@rollup/plugin-replace": "^3.0.0",
+    "chokidar": "^3.5.2",
+    "commander": "^8.2.0",
+    "ejs": "^3.1.6",
+    "glob": "^7.2.0",
+    "html-minifier-terser": "^6.0.2",
+    "json5": "^2.2.0",
+    "rollup": "^2.58.0",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "sass": "^1.43.2",
+    "terser": "^5.9.0",
+    "tmp-promise": "^3.0.2",
+    "typescript": "^4.4.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@babel/preset-env": "^7.15.8",
+    "@babel/preset-typescript": "^7.15.0",
+    "@types/ejs": "^3.1.0",
+    "@types/glob": "^7.2.0",
+    "@types/html-minifier-terser": "^6.0.0",
+    "@types/jest": "^27.0.2",
+    "@types/sass": "^1.16.1",
+    "babel-jest": "^27.3.1",
+    "jest": "^27.3.1",
+    "ts-node": "^10.3.1"
+  }
+}
