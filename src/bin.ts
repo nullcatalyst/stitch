@@ -18,7 +18,7 @@ import ToBase64Plugin from './plugins/to-base64';
 import TsRollupPlugin from './plugins/ts-rollup';
 import VirtualFilePlugin from './plugins/virtual-file';
 import * as glob from 'glob';
-import {promisify} from 'util';
+import { promisify } from 'util';
 import { Options as PipelineOptions } from './composer/pipeline';
 import FsWatcher from './watcher/fs-watcher';
 
@@ -113,7 +113,7 @@ function addDefaultPlugins(composer: Composer): Composer {
         .addPlugin(new ToBase64Plugin())
         .addPlugin(new CopyFilePlugin())
         .addPlugin(new CargoWasmPlugin())
-        .addPlugin(new CppWasmPlugin().enableFeatureMultivalue(true))
+        .addPlugin(new CppWasmPlugin().enableFeature('multivalue').enableFeature('simd128').enableFeature('tailcall'))
         .addPlugin(new EjsPlugin())
         .addPlugin(new SassPlugin())
         .addPlugin(new GlslPlugin())
@@ -163,7 +163,7 @@ async function parseManifest(composer: Composer, manifestFileName: string): Prom
     for (const src of manifest.srcs) {
         if (typeof src === 'string') {
             const schemeSep = src.lastIndexOf(scheme.SEP);
-            let inputScheme: null|string = null;
+            let inputScheme: null | string = null;
             let input = src;
             if (schemeSep >= 0) {
                 inputScheme = src.slice(0, schemeSep);

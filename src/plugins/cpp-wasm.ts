@@ -10,10 +10,28 @@ import * as pathutil from '../util/path';
 import { file as tmpFile } from 'tmp-promise';
 
 export default class CppWasmPlugin extends Plugin {
-    private _enableFeatureMultivalue: boolean = false;
+    // Optional features
+    private _enableMultivalue: boolean = false;
+    private _enableSimd128: boolean = false;
+    private _enableTailCall: boolean = false;
 
-    enableFeatureMultivalue(enable: boolean): this {
-        this._enableFeatureMultivalue = enable;
+    enableFeature(feature: 'multivalue' | 'simd128' | 'tailcall'): this {
+        switch (feature) {
+            case 'multivalue': this._enableMultivalue = true; break;
+            case 'simd128': this._enableSimd128 = true; break;
+            case 'tailcall': this._enableTailCall = true; break;
+            default: throw new Error(`cannot enable unknown or unsupported wasm feature [${feature}]`);
+        }
+        return this;
+    }
+
+    disableFeature(feature: 'multivalue' | 'simd128' | 'tailcall'): this {
+        switch (feature) {
+            case 'multivalue': this._enableMultivalue = false; break;
+            case 'simd128': this._enableSimd128 = false; break;
+            case 'tailcall': this._enableTailCall = false; break;
+            default: throw new Error(`cannot disable unknown or unsupported wasm feature [${feature}]`);
+        }
         return this;
     }
 
@@ -53,8 +71,14 @@ export default class CppWasmPlugin extends Plugin {
         const defer = [];
         const p = (async () => {
             const args = ['--target=wasm32-unknown-unknown', '-Xlinker', '--no-entry', '-nostdlib', '-std=c++17'];
-            if (this._enableFeatureMultivalue) {
+            if (this._enableMultivalue) {
                 args.push('-mmultivalue', '-Xclang', '-target-abi', '-Xclang', 'experimental-mv');
+            }
+            if (this._enableSimd128) {
+                args.push('-msimd128');
+            }
+            if (this._enableTailCall) {
+                args.push('-mtail-call');
             }
 
             if (Array.isArray(manifest.includes)) {
