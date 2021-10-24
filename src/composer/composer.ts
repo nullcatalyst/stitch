@@ -2,6 +2,7 @@ import * as chokidar from 'chokidar';
 import * as path from 'path';
 import VirtualFilePlugin from '../plugins/virtual-file';
 import TwoWayMap from '../util/two-way-map';
+import Watcher from '../watcher/watcher';
 import Pipeline, { Options as PipelineOptions } from './pipeline';
 import Plugin from './plugin';
 import Target from './target';
@@ -107,29 +108,20 @@ export default class Composer {
         });
     }
 
-    async watch(watchFolder: string): Promise<void> {
+    async watch(watcher: Watcher): Promise<void> {
         await this.build();
 
-        chokidar
-            .watch(watchFolder, {
-                atomic: true,
-            })
-            .on('all', async (event, fileName) => {
-                if (event != 'change') {
-                    return;
-                }
+        watcher.start(async (filePath: string) => {
+            if (this.options.verbose) {
+                console.log(`file "${filePath}" changed`);
+            }
 
-                const filePath = path.resolve(watchFolder, '..', fileName);
-                if (this.options.verbose) {
-                    console.log(`file "${filePath}" changed`);
-                }
-
-                await Promise.all([
-                    this.triggerPipeline(filePath).catch(() => {}),
-                    ...this.dependencies
-                        .getReverse(filePath)
-                        .map(async filePath => this.triggerPipeline(filePath).catch(() => {})),
-                ]);
-            });
+            await Promise.all([
+                this.triggerPipeline(filePath).catch(() => {}),
+                ...this.dependencies
+                    .getReverse(filePath)
+                    .map(async filePath => this.triggerPipeline(filePath).catch(() => {})),
+            ]);
+        });
     }
 }

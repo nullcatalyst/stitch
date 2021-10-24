@@ -51,10 +51,16 @@ export default class CppWasmPlugin extends Plugin {
         resolvePath: (fileName: string) => string,
     ): Promise<Buffer | string> {
         const defer = [];
-        const p = new Promise<Buffer | string>(async (resolve, reject) => {
+        const p = (async () => {
             const args = ['--target=wasm32-unknown-unknown', '-Xlinker', '--no-entry', '-nostdlib', '-std=c++17'];
             if (this._enableFeatureMultivalue) {
                 args.push('-mmultivalue', '-Xclang', '-target-abi', '-Xclang', 'experimental-mv');
+            }
+
+            if (Array.isArray(manifest.includes)) {
+                for (const include of manifest.includes) {
+                    args.push('-I', resolvePath(include));
+                }
             }
 
             let tmpPath: string;
@@ -103,8 +109,8 @@ export default class CppWasmPlugin extends Plugin {
                 // result = await fs.promises.readFile(tmpPath);
             }
 
-            resolve(result);
-        });
+            return result;
+        })();
         p.finally(() => defer.forEach(defer => defer()));
         return p;
     }
@@ -145,5 +151,6 @@ function spawn(command: string, args: string[], input?: Buffer | string): Promis
 interface Manifest {
     out?: string;
     srcs?: string[];
+    includes?: string[];
     flags?: string[];
 }

@@ -20,6 +20,7 @@ import VirtualFilePlugin from './plugins/virtual-file';
 import * as glob from 'glob';
 import {promisify} from 'util';
 import { Options as PipelineOptions } from './composer/pipeline';
+import FsWatcher from './watcher/fs-watcher';
 
 const globP = promisify(glob);
 
@@ -100,7 +101,7 @@ program
             await parseManifest(composer, options.config);
         }
 
-        composer.watch(options.root).catch(console.error);
+        composer.watch(new FsWatcher(options.root)).catch(console.error);
     });
 
 program.parse(process.argv);
