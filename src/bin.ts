@@ -7,6 +7,7 @@ import Composer from './composer/composer';
 import CargoWasmPlugin from './plugins/cargo-wasm';
 import CopyFilePlugin from './plugins/copy-file';
 import CppWasmPlugin from './plugins/cpp-wasm';
+import CppPlugin from './plugins/cpp';
 import CssClassMinifyPlugin from './plugins/css-class-minify';
 import EjsPlugin from './plugins/ejs';
 import GlslPlugin from './plugins/glsl';
@@ -113,7 +114,8 @@ function addDefaultPlugins(composer: Composer): Composer {
         .addPlugin(new ToBase64Plugin())
         .addPlugin(new CopyFilePlugin())
         .addPlugin(new CargoWasmPlugin())
-        .addPlugin(new CppWasmPlugin().enableFeature('multivalue').enableFeature('simd128').enableFeature('tailcall'))
+        .addPlugin(new CppPlugin().setCppVersion(17))
+        .addPlugin(new CppWasmPlugin().setCppVersion(17).enableFeature('multivalue').enableFeature('simd128').enableFeature('tailcall'))
         .addPlugin(new EjsPlugin())
         .addPlugin(new SassPlugin())
         .addPlugin(new GlslPlugin())
