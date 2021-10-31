@@ -67,6 +67,11 @@ export default class CppPlugin extends Plugin {
                     args.push('-I', resolvePath(include));
                 }
             }
+            if (Array.isArray(manifest.libs)) {
+                for (const lib of manifest.libs) {
+                    args.push('-L', resolvePath(lib));
+                }
+            }
 
             let tmpPath: string;
             if (composer.options.release) {
@@ -126,5 +131,6 @@ interface Manifest {
     out?: string;
     srcs?: string[];
     includes?: string[];
+    libs?: string[];
     flags?: string[];
 }
