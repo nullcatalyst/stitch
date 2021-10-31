@@ -91,7 +91,11 @@ export default class CppWasmPlugin extends Plugin {
             if (this._enableTailCall) {
                 args.push('-mtail-call');
             }
-
+            if (Array.isArray(manifest.flags)) {
+                for (const flag of manifest.flags) {
+                    args.push(flag);
+                }
+            }
             if (Array.isArray(manifest.includes)) {
                 for (const include of manifest.includes) {
                     args.push('-I', resolvePath(include));
@@ -110,7 +114,6 @@ export default class CppWasmPlugin extends Plugin {
                 const { path, cleanup } = await tmpFile();
                 tmpPath = path;
                 defer.push(cleanup);
-
                 args.push('-o', path);
             } else {
                 args.push('-o-');

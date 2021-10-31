@@ -3,6 +3,7 @@ import Composer from '../composer/composer';
 import Plugin from '../composer/plugin';
 import * as json5 from 'json5';
 import * as path from 'path';
+import * as fs from 'fs';
 import * as scheme from '../composer/scheme';
 import Target from '../composer/target';
 import * as pathutil from '../util/path';
@@ -12,9 +13,6 @@ type CppVersion = undefined | 11 | 14 | 17 | 20 | '11' | '14' | '17' | '20' | '2
 
 export default class CppPlugin extends Plugin {
     private _cppVersion: CppVersion = undefined;
-    private _enableMultivalue: boolean = false;
-    private _enableSimd128: boolean = false;
-    private _enableTailCall: boolean = false;
 
     setCppVersion(version: CppVersion): this {
         this._cppVersion = version;
@@ -44,7 +42,7 @@ export default class CppPlugin extends Plugin {
             : pathutil.replaceExt(target.path, process.platform === 'win32' ? '.exe' : '');
 
         return new Target(
-            scheme.replaceFirst(target.scheme, 'wasm'),
+            scheme.replaceFirst(target.scheme, 'exe'),
             outputFileName,
             target.root,
             this._compile(composer, manifest, resolvePath),
@@ -62,6 +60,11 @@ export default class CppPlugin extends Plugin {
             if (this._cppVersion) {
                 args.push(`-std=c++${this._cppVersion}`);
             }
+            if (Array.isArray(manifest.flags)) {
+                for (const flag of manifest.flags) {
+                    args.push(flag);
+                }
+            }
             if (Array.isArray(manifest.includes)) {
                 for (const include of manifest.includes) {
                     args.push('-I', resolvePath(include));
@@ -73,22 +76,16 @@ export default class CppPlugin extends Plugin {
                 }
             }
 
-            let tmpPath: string;
             if (composer.options.release) {
                 args.push('-Os', '-ffast-math', '-flto', '-Wl,--lto-O3');
-
-                const { path, cleanup } = await tmpFile();
-                tmpPath = path;
-                defer.push(cleanup);
-
-                args.push('-o', path);
-            } else {
-                args.push('-o-');
             }
+            const { path: tmpPath, cleanup } = await tmpFile();
+            defer.push(cleanup);
+            args.push('-o', tmpPath);
 
             args.push(...(manifest.srcs ?? []).map(resolvePath));
-
-            return await spawn('clang', args);
+            await spawn('clang', args);
+            return fs.promises.readFile(path);
         })();
         p.finally(() => defer.forEach(defer => defer()));
         return p;
